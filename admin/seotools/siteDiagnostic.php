@@ -39,11 +39,6 @@ if( $nv_Request->isset_request( 'i', 'get' ) )
 
 		if( ! isset( $Diagnostic ) or ! is_object( $Diagnostic ) )
 		{
-			if( ! class_exists( 'UrlGetContents' ) )
-			{
-				include NV_ROOTDIR . '/includes/class/Diagnostic.class.php' ;
-			}
-
 			$Diagnostic = new Diagnostic();
 		}
 
@@ -80,7 +75,7 @@ if( $nv_Request->isset_request( 'i', 'get' ) )
 				'PageRank' => array(
 					'class' => ' class="' . $class_PageRank . '"',
 					'style' => 'text-align:right',
-					'content' => '<img alt="' . $inf['PageRank'] . '" src="' . NV_BASE_SITEURL . 'images/rank/' . $inf['PageRank'] . '.gif" width="42" height="7" /> ' . number_format( $inf['PageRank'] )
+					'content' => '<img alt="' . $inf['PageRank'] . '" src="' . NV_BASE_SITEURL . NV_FILES_DIR . '/images/rank/' . $inf['PageRank'] . '.gif" width="42" height="7" /> ' . number_format( $inf['PageRank'] )
 				),
 				'AlexaRank' => array(
 					'class' => ' class="' . $class_AlexaRank . '"',

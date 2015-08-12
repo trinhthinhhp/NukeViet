@@ -272,7 +272,6 @@ function nv_get_viewImage( $fileName )
 					}
 				}
 			}
-			include_once NV_ROOTDIR . '/includes/class/image.class.php' ;
 			$image = new image( NV_ROOTDIR . '/' . $fileName, NV_MAX_WIDTH, NV_MAX_HEIGHT );
 			if( $thumb_config['thumb_type'] == 4 )
 			{
@@ -355,7 +354,7 @@ function nv_getFileInfo( $pathimg, $file )
 	$stat = @stat( NV_ROOTDIR . '/' . $pathimg . '/' . $file );
 	$info['filesize'] = $stat['size'];
 
-	$info['src'] = 'images/file.gif';
+	$info['src'] = NV_FILES_DIR . '/images/file.gif';
 	$info['srcwidth'] = 32;
 	$info['srcheight'] = 32;
 	$info['size'] = '|';
@@ -395,7 +394,7 @@ function nv_getFileInfo( $pathimg, $file )
 	elseif( in_array( $ext, $array_flash ) )
 	{
 		$info['type'] = 'flash';
-		$info['src'] = 'images/flash.gif';
+		$info['src'] = NV_FILES_DIR . '/images/flash.gif';
 
 		if( $matches[2] == 'swf' )
 		{
@@ -408,25 +407,25 @@ function nv_getFileInfo( $pathimg, $file )
 	}
 	elseif( in_array( $ext, $array_archives ) )
 	{
-		$info['src'] = 'images/zip.gif';
+		$info['src'] = NV_FILES_DIR . '/images/zip.gif';
 	}
 	elseif( in_array( $ext, $array_documents ) )
 	{
 		if( $ext == 'doc' or $ext == 'docx' )
 		{
-			$info['src'] = 'images/msword.png';
+			$info['src'] = NV_FILES_DIR . '/images/msword.png';
 		}
 		elseif( $ext == 'xls' or $ext == 'xlsx' )
 		{
-			$info['src'] = 'images/excel.png';
+			$info['src'] = NV_FILES_DIR . '/images/excel.png';
 		}
 		elseif( $ext == 'pdf' )
 		{
-			$info['src'] = 'images/pdf.png';
+			$info['src'] = NV_FILES_DIR . '/images/pdf.png';
 		}
 		else
 		{
-			$info['src'] = 'images/doc.gif';
+			$info['src'] = NV_FILES_DIR . '/images/doc.gif';
 		}
 	}
 
@@ -543,7 +542,7 @@ function nv_listUploadDir( $dir, $real_dirlist = array() )
 	return $real_dirlist;
 }
 
-$allow_upload_dir = array( 'images', SYSTEM_UPLOADS_DIR );
+$allow_upload_dir = array( SYSTEM_UPLOADS_DIR );
 $array_hidefolders = array( '.', '..', 'index.html', '.htaccess', '.tmp' );
 
 $array_images = array( 'gif', 'jpg', 'jpeg', 'pjpeg', 'png', 'ico' );

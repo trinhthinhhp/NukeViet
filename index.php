@@ -10,7 +10,10 @@
 
 define( 'NV_SYSTEM', true );
 
-require str_replace( DIRECTORY_SEPARATOR, '/', dirname( __file__ ) ) . '/mainfile.php';
+// Xac dinh thu muc goc cua site
+define( 'NV_ROOTDIR', pathinfo( str_replace( DIRECTORY_SEPARATOR, '/', __file__ ), PATHINFO_DIRNAME ) );
+
+require NV_ROOTDIR .'/includes/mainfile.php';
 
 require NV_ROOTDIR . '/includes/core/user_functions.php';
 
@@ -83,6 +86,15 @@ if( preg_match( $global_config['check_module'], $module_name ) )
 	// Kiểm tra module có trong hệ thống hay không
 	if( isset( $site_mods[$module_name] ) )
 	{
+		// SSL
+		if( $global_config['ssl_https'] === 3 and ! empty( $global_config['ssl_https_modules'] ) and in_array( $module_name, $global_config['ssl_https_modules'] ) and ( ! isset( $_SERVER['HTTPS'] ) or $_SERVER['HTTPS'] == 'off' ) )
+		{
+			header( "HTTP/1.1 301 Moved Permanently" );
+			header( "Location: https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
+			exit();
+		}		
+		
+		// Global variable for module
 		$module_info = $site_mods[$module_name];
 		$module_file = $module_info['module_file'];
 		$module_data = $module_info['module_data'];
@@ -171,16 +183,16 @@ if( preg_match( $global_config['check_module'], $module_name ) )
 			// Xac dinh giao dien chung
 			$is_mobile = false;
 			$theme_type = '';
-			$_theme = ( ! empty( $module_info['mobile'] ) ) ? $module_info['mobile'] : $global_config['mobile_theme'];
-			if( ( ( $client_info['is_mobile'] and ( empty( $global_config['current_theme_type'] ) or empty( $global_config['switch_mobi_des'] ) ) ) or ( $global_config['current_theme_type'] == 'm' and ! empty( $global_config['switch_mobi_des'] ) ) ) and ! empty( $_theme ) and file_exists( NV_ROOTDIR . '/themes/' . $_theme . '/theme.php' ) )
+			$_theme_mobile = ( ! empty( $module_info['mobile'] ) ) ? $module_info['mobile'] : $global_config['mobile_theme'];
+			if( ( ( $client_info['is_mobile'] and ( empty( $global_config['current_theme_type'] ) or empty( $global_config['switch_mobi_des'] ) ) ) or ( $global_config['current_theme_type'] == 'm' and ! empty( $global_config['switch_mobi_des'] ) ) ) and ! empty( $_theme_mobile ) and file_exists( NV_ROOTDIR . '/themes/' . $_theme_mobile . '/theme.php' ) )
 			{
-				$global_config['module_theme'] = $_theme;
+				$global_config['module_theme'] = $_theme_mobile;
 				$is_mobile = true;
 				$theme_type = 'm';
 			}
 			else
 			{
-				if( empty( $global_config['current_theme_type'] ) and $client_info['is_mobile'] )
+				if( empty( $global_config['current_theme_type'] ) and ( $client_info['is_mobile'] or empty( $_theme_mobile ) ) )
 				{
 					$global_config['current_theme_type'] = 'r';
 				}

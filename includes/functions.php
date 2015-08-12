@@ -131,91 +131,6 @@ function nv_checkagent( $a )
 }
 
 /**
- * nv_check_bot()
- *
- * @return
- */
-function nv_check_bot()
-{
-	$file_bots = NV_ROOTDIR . '/' . NV_DATADIR . '/bots.config';
-	$bots = ( file_exists( $file_bots ) and filesize( $file_bots ) ) ? unserialize( file_get_contents( $file_bots ) ) : array();
-
-	if( empty( $bots ) and file_exists( NV_ROOTDIR . '/includes/bots.php' ) ) include NV_ROOTDIR . '/includes/bots.php' ;
-
-	if( empty( $bots ) ) return array();
-
-	foreach( $bots as $name => $values )
-	{
-		$is_bot = false;
-
-		if( $values['agent'] and preg_match( '#' . str_replace( '\*', '.*?', nv_preg_quote( $values['agent'], '#' ) ) . '#i', NV_USER_AGENT ) ) $is_bot = true;
-
-		if( ! empty( $values['ips'] ) and ( $is_bot or ! $values['agent'] ) )
-		{
-			$is_bot = false;
-			$ips = implode( '|', array_map( 'nv_preg_quote', explode( '|', $values['ips'] ) ) );
-			if( preg_match( '/^' . $ips . '/', NV_CLIENT_IP ) ) $is_bot = true;
-		}
-
-		if( $is_bot ) return array(
-			'name' => $name,
-			'agent' => $values['agent'],
-			'ip' => NV_CLIENT_IP,
-			'allowed' => $values['allowed']
-		);
-	}
-
-	return array();
-}
-
-/**
- * nv_getBrowser()
- *
- * @param string $agent
- * @return
- */
-function nv_getBrowser( $agent )
-{
-	global $nv_parse_ini_browsers;
-
-	foreach( $nv_parse_ini_browsers as $key => $info )
-	{
-		if( preg_match( '#' . $info['rule'] . '#i', $agent, $results ) )
-		{
-			if( isset( $results[1] ) ) return ( $key . '|' . $info['name'] . ' v' . $results[1] );
-
-			return ( $key . '|' . $info['name'] );
-		}
-	}
-
-	return ( 'Unknown|Unknown' );
-}
-
-/**
- * nv_getOs()
- *
- * @param string $agent
- * @return
- */
-function nv_getOs( $agent )
-{
-	global $nv_parse_ini_os;
-
-	foreach( $nv_parse_ini_os as $key => $info )
-	{
-		if( preg_match( '#' . $info['rule'] . '#i', $agent, $results ) )
-		{
-			if( strstr( $key, 'win' ) ) return ( $key . '|' . $info['name'] );
-			if( isset( $results[1] ) ) return ( $key . '|' . $info['name'] . ' ' . $results[1] );
-
-			return ( $key . '|' . $info['name'] );
-		}
-	}
-
-	return ( 'Unspecified|Unspecified' );
-}
-
-/**
  * nv_convertfromBytes()
  *
  * @param integer $size
@@ -333,13 +248,14 @@ function nv_function_exists( $funcName )
  * nv_class_exists()
  *
  * @param string $clName
+ * @param bool $autoload
  * @return
  */
-function nv_class_exists( $clName )
+function nv_class_exists( $clName, $autoload = true )
 {
 	global $sys_info;
 
-	return ( class_exists( $clName ) and ! in_array( $clName, $sys_info['disable_classes'] ) );
+	return ( class_exists( $clName, $autoload ) and ! in_array( $clName, $sys_info['disable_classes'] ) );
 }
 
 /**
@@ -626,6 +542,7 @@ function nv_user_in_groups( $groups_view )
 		else
 		{
 			global $user_info;
+			if ( empty( $user_info['in_groups'] ) ) return false;
 			return ( array_intersect( $user_info['in_groups'], $groups_view ) != array() );
 		}
 	}
@@ -745,57 +662,54 @@ function nv_show_name_user( $first_name, $last_name,  $user_name = '' )
  */
 function nv_date( $format, $time = 0 )
 {
-	global $lang_global;
+    global $lang_global;
 
-	if( ! $time ) $time = NV_CURRENTTIME;
-	$return = date( $format, $time );
+    if ( ! $time ) $time = NV_CURRENTTIME;
+    $format = str_replace( "r", "D, d M Y H:i:s O", $format );
+    $format = str_replace( array( "D", "M" ), array( "[D]", "[M]" ), $format );
+    $return = date( $format, $time );
 
-	$replaces = array(
-		'Sunday' => $lang_global['sunday'],
-		'Monday' => $lang_global['monday'],
-		'Tuesday' => $lang_global['tuesday'],
-		'Wednesday' => $lang_global['wednesday'],
-		'Thursday' => $lang_global['thursday'],
-		'Friday' => $lang_global['friday'],
-		'Saturday' => $lang_global['saturday'],
-		'January' => $lang_global['january'],
-		'February' => $lang_global['february'],
-		'March' => $lang_global['march'],
-		'April' => $lang_global['april'],
-		'May' => $lang_global['may'],
-		'June' => $lang_global['june'],
-		'July' => $lang_global['july'],
-		'August' => $lang_global['august'],
-		'September' => $lang_global['september'],
-		'October' => $lang_global['october'],
-		'November' => $lang_global['november'],
-		'December' => $lang_global['december']
-	);
-	$return = str_replace( array_keys( $replaces ), array_values( $replaces ), $return );
+    $replaces = array(
+        '/\[Sun\](\W|$)/' => $lang_global['sun'] . "$1",
+        '/\[Mon\](\W|$)/' => $lang_global['mon'] . "$1",
+        '/\[Tue\](\W|$)/' => $lang_global['tue'] . "$1",
+        '/\[Wed\](\W|$)/' => $lang_global['wed'] . "$1",
+        '/\[Thu\](\W|$)/' => $lang_global['thu'] . "$1",
+        '/\[Fri\](\W|$)/' => $lang_global['fri'] . "$1",
+        '/\[Sat\](\W|$)/' => $lang_global['sat'] . "$1",
+        '/\[Jan\](\W|$)/' => $lang_global['jan'] . "$1",
+        '/\[Feb\](\W|$)/' => $lang_global['feb'] . "$1",
+        '/\[Mar\](\W|$)/' => $lang_global['mar'] . "$1",
+        '/\[Apr\](\W|$)/' => $lang_global['apr'] . "$1",
+        '/\[May\](\W|$)/' => $lang_global['may2'] . "$1",
+        '/\[Jun\](\W|$)/' => $lang_global['jun'] . "$1",
+        '/\[Jul\](\W|$)/' => $lang_global['jul'] . "$1",
+        '/\[Aug\](\W|$)/' => $lang_global['aug'] . "$1",
+        '/\[Sep\](\W|$)/' => $lang_global['sep'] . "$1",
+        '/\[Oct\](\W|$)/' => $lang_global['oct'] . "$1",
+        '/\[Nov\](\W|$)/' => $lang_global['nov'] . "$1",
+        '/\[Dec\](\W|$)/' => $lang_global['dec'] . "$1",
+        '/Sunday(\W|$)/' => $lang_global['sunday'] . "$1",
+        '/Monday(\W|$)/' => $lang_global['monday'] . "$1",
+        '/Tuesday(\W|$)/' => $lang_global['tuesday'] . "$1",
+        '/Wednesday(\W|$)/' => $lang_global['wednesday'] . "$1",
+        '/Thursday(\W|$)/' => $lang_global['thursday'] . "$1",
+        '/Friday(\W|$)/' => $lang_global['friday'] . "$1",
+        '/Saturday(\W|$)/' => $lang_global['saturday'] . "$1",
+        '/January(\W|$)/' => $lang_global['january'] . "$1",
+        '/February(\W|$)/' => $lang_global['february'] . "$1",
+        '/March(\W|$)/' => $lang_global['march'] . "$1",
+        '/April(\W|$)/' => $lang_global['april'] . "$1",
+        '/May(\W|$)/' => $lang_global['may'] . "$1",
+        '/June(\W|$)/' => $lang_global['june'] . "$1",
+        '/July(\W|$)/' => $lang_global['july'] . "$1",
+        '/August(\W|$)/' => $lang_global['august'] . "$1",
+        '/September(\W|$)/' => $lang_global['september'] . "$1",
+        '/October(\W|$)/' => $lang_global['october'] . "$1",
+        '/November(\W|$)/' => $lang_global['november'] . "$1",
+        '/December(\W|$)/' => $lang_global['december'] . "$1" );
 
-	$replaces = array(
-		'Sun' => $lang_global['sun'],
-		'Mon' => $lang_global['mon'],
-		'Tue' => $lang_global['tue'],
-		'Wed' => $lang_global['wed'],
-		'Thu' => $lang_global['thu'],
-		'Fri' => $lang_global['fri'],
-		'Sat' => $lang_global['sat'],
-		'Jan' => $lang_global['jan'],
-		'Feb' => $lang_global['feb'],
-		'Mar' => $lang_global['mar'],
-		'Apr' => $lang_global['apr'],
-		'May' => $lang_global['may2'],
-		'Jun' => $lang_global['jun'],
-		'Jul' => $lang_global['jul'],
-		'Aug' => $lang_global['aug'],
-		'Sep' => $lang_global['sep'],
-		'Oct' => $lang_global['oct'],
-		'Nov' => $lang_global['nov'],
-		'Dec' => $lang_global['dec']
-	);
-
-	return str_replace( array_keys( $replaces ), array_values( $replaces ), $return );
+    return preg_replace( array_keys( $replaces ), array_values( $replaces ), $return );
 }
 
 /**
@@ -1081,12 +995,10 @@ function nv_sendmail( $from, $to, $subject, $message, $files = '' )
 {
 	global $db, $global_config, $sys_info;
 
-	require_once NV_ROOTDIR . '/includes/phpmailer/PHPMailerAutoload.php';
-
 	try
 	{
 		$mail = new PHPMailer;
-		$mail->SetLanguage( NV_LANG_INTERFACE, NV_ROOTDIR . '/language/' . NV_LANG_INTERFACE . '/' );
+		$mail->SetLanguage( NV_LANG_INTERFACE, NV_ROOTDIR . '/includes/language/' . NV_LANG_INTERFACE . '/' );
 		$mail->CharSet = $global_config['site_charset'];
 
 		$mailer_mode = strtolower( $global_config['mailer_mode'] );
@@ -1444,7 +1356,6 @@ function nv_check_domain( $domain )
 		}
 		else
 		{
-			require_once NV_ROOTDIR . '/includes/class/idna_convert.class.php';
 			$IDN = new idna_convert( array( 'idn_version' => 2008 ) );
 			$domain_ascii = $IDN->encode( $domain );
 		}
@@ -1639,78 +1550,61 @@ function nv_url_rewrite( $buffer, $is_url = false )
  */
 function nv_change_buffer( $buffer )
 {
-	global $db, $sys_info, $global_config, $client_info;
+    global $db, $sys_info, $global_config, $client_info;
 
-	if( NV_ANTI_IFRAME and ! $client_info['is_myreferer'] ) $buffer = preg_replace( '/(<body[^>]*>)/', "$1\r\n<script type=\"text/javascript\">if(window.top!==window.self){document.write=\"\";window.top.location=window.self.location;setTimeout(function(){document.body.innerHTML=\"\"},1);window.self.onload=function(){document.body.innerHTML=\"\"}};</script>", $buffer, 1 );
+    if ( NV_ANTI_IFRAME and ! $client_info['is_myreferer'] ) $buffer = preg_replace( '/(<body[^>]*>)/', "$1" . PHP_EOL . "<script>if(window.top!==window.self){document.write=\"\";window.top.location=window.self.location;setTimeout(function(){document.body.innerHTML=\"\"},1);window.self.onload=function(){document.body.innerHTML=\"\"}};</script>", $buffer, 1 );
 
-	if( defined( 'NV_SYSTEM' ) and preg_match( '/^UA-\d{4,}-\d+$/', $global_config['googleAnalyticsID'] ) )
-	{
-		$googleAnalytics = "<script type=\"text/javascript\">\r\n";
-		$googleAnalytics .= "//<![CDATA[\r\n";
-		if( $global_config['googleAnalyticsMethod'] == 'universal' )
-		{
-			$googleAnalytics .= "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){\r\n";
-			$googleAnalytics .= "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\r\n";
-			$googleAnalytics .= "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\r\n";
-			$googleAnalytics .= "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');\r\n";
-			$googleAnalytics .= "ga('create', '" . $global_config['googleAnalyticsID'] . "', '" . $global_config['cookie_domain'] . "');\r\n";
-			$googleAnalytics .= "ga('send', 'pageview');\r\n";
-		}
-		else
-		{
-			$dp = '';
-			if( $global_config['googleAnalyticsSetDomainName'] == 1 )
-			{
-				$dp .= "_gaq.push([\"_setDomainName\",\"" . $global_config['cookie_domain'] . "\"]);";
-			}
-			elseif( $global_config['googleAnalyticsSetDomainName'] == 2 )
-			{
-				$dp .= "_gaq.push([\"_setDomainName\",\"none\"]);_gaq.push([\"_setAllowLinker\",true]);";
-			}
-			$googleAnalytics .= "var _gaq=_gaq||[];_gaq.push([\"_setAccount\",\"" . $global_config['googleAnalyticsID'] . "\"]);" . $dp . "_gaq.push([\"_trackPageview\"]);(function(){var a=document.createElement(\"script\");a.type=\"text/javascript\";a.async=true;a.src=(\"https:\"==document.location.protocol?\"https://ssl\":\"http://www\")+\".google-analytics.com/ga.js\";var b=document.getElementsByTagName(\"script\")[0];b.parentNode.insertBefore(a,b)})();\r\n";
-		}
-		$googleAnalytics .= "//]]>\r\n";
-		$googleAnalytics .= "</script>\r\n";
-		$buffer = preg_replace( '/(<\/head>)/i', $googleAnalytics . "\\1", $buffer, 1 );
-	}
+    $body_replace = $internal = $external = '';
 
-	$body_replace = '';
-	if( NV_CURRENTTIME > $global_config['cronjobs_next_time'] )
-	{
-		$body_replace .= "<div id=\"run_cronjobs\" style=\"visibility:hidden;display:none;\"><img alt=\"\" src=\"" . NV_BASE_SITEURL . "index.php?second=cronjobs&amp;p=" . nv_genpass() . "\" width=\"1\" height=\"1\" /></div>\n";
-	}
-	if( NV_LANG_INTERFACE == 'vi' and ( $global_config['mudim_active'] == 1 or ( $global_config['mudim_active'] == 2 and defined( 'NV_SYSTEM' ) ) or ( $global_config['mudim_active'] == 3 and defined( 'NV_ADMIN' ) ) ) )
-	{
-		$body_replace .= "<script type=\"text/javascript\">
-				var mudim_showPanel = " . ( ( $global_config['mudim_showpanel'] ) ? "true" : "false" ) . ";
-				var mudim_displayMode = " . $global_config['mudim_displaymode'] . ";
-				var mudim_method = " . $global_config['mudim_method'] . ";
-			</script>\n";
-		$body_replace .= "<script type=\"text/javascript\" src=\"" . NV_BASE_SITEURL . "js/mudim.js\"></script>\n";
-	}
-	$buffer = preg_replace( '/(<\/body>)/i', $body_replace . '\\1', $buffer, 1 );
+    if ( NV_CURRENTTIME > $global_config['cronjobs_next_time'] )
+    {
+        $body_replace .= "<div id=\"run_cronjobs\" style=\"visibility:hidden;display:none;\"><img alt=\"\" src=\"" . NV_BASE_SITEURL . "index.php?second=cronjobs&amp;p=" . nv_genpass() . "\" width=\"1\" height=\"1\" /></div>" . PHP_EOL;
+    }
 
-	if( ( $global_config['optActive'] == 1 ) || ( ! defined( 'NV_ADMIN' ) and $global_config['optActive'] == 2 ) || ( defined( 'NV_ADMIN' ) and $global_config['optActive'] == 3 ) )
-	{
-		include_once NV_ROOTDIR . '/includes/class/optimizer.class.php' ;
-		$opt_css_file = ( empty( $global_config['cdn_url'] ) ) ? true : false;
-		$optimezer = new optimezer( $buffer, $opt_css_file );
-		$buffer = $optimezer->process();
-	}
+    if ( defined( 'NV_SYSTEM' ) and preg_match( '/^UA-\d{4,}-\d+$/', $global_config['googleAnalyticsID'] ) )
+    {
+        if ( $global_config['googleAnalyticsMethod'] == 'universal' )
+        {
+            $internal .= "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" . PHP_EOL;
+            $internal .= "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," . PHP_EOL;
+            $internal .= "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" . PHP_EOL;
+            $internal .= "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" . PHP_EOL;
+            $internal .= "ga('create', '" . $global_config['googleAnalyticsID'] . "', '" . $global_config['cookie_domain'] . "');" . PHP_EOL;
+            $internal .= "ga('send', 'pageview');" . PHP_EOL;
+        }
+        else
+        {
+            $dp = '';
+            if ( $global_config['googleAnalyticsSetDomainName'] == 1 )
+            {
+                $dp .= "_gaq.push([\"_setDomainName\",\"" . $global_config['cookie_domain'] . "\"]);";
+            }
+            elseif ( $global_config['googleAnalyticsSetDomainName'] == 2 )
+            {
+                $dp .= "_gaq.push([\"_setDomainName\",\"none\"]);_gaq.push([\"_setAllowLinker\",true]);";
+            }
+            $internal .= "var _gaq=_gaq||[];_gaq.push([\"_setAccount\",\"" . $global_config['googleAnalyticsID'] . "\"]);" . $dp . "_gaq.push([\"_trackPageview\"]);(function(){var a=document.createElement(\"script\");a.type=\"text/javascript\";a.async=true;a.src=(\"https:\"==document.location.protocol?\"https://ssl\":\"http://www\")+\".google-analytics.com/ga.js\";var b=document.getElementsByTagName(\"script\")[0];b.parentNode.insertBefore(a,b)})();" . PHP_EOL;
+        }
+    }
 
-	if( ! empty( $global_config['cdn_url'] ) )
-	{
-		$buffer = preg_replace( "/\<(script|link)(.*?)(src|href)=['\"]((?!http(s?)|ftp\:\/\/).*?\.(js|css))['\"](.*?)\>/", "<\\1\\2\\3=\"" . $global_config['cdn_url'] . "\\4?t=" . $global_config['timestamp'] . "\"\\7>", $buffer );
-	}
-	elseif( ! $sys_info['supports_rewrite'] )
-	{
-		$buffer = preg_replace( "/\<(script|link)(.*?)(src|href)=['\"]((?!http(s?)|ftp\:\/\/).*?\.(js|css))['\"](.*?)\>/", "<\\1\\2\\3=\"" . NV_BASE_SITEURL . "CJzip.php?file=\\4&amp;r=" . $global_config['timestamp'] . "\"\\7>", $buffer );
-	}
-	else
-	{
-		$buffer = preg_replace( "/\<(script|link)(.*?)(src|href)=['\"]((?!http(s?)|ftp\:\/\/).*?\.(js|css))['\"](.*?)\>/", "<\\1\\2\\3=\"\\4?t=" . $global_config['timestamp'] . "\"\\7>", $buffer );
-	}
-	return $buffer;
+    if ( ! empty( $internal ) ) $internal = "<script>" . PHP_EOL . $internal . "</script>" . PHP_EOL;
+    $body_replace .= $internal . $external;
+
+    if ( ! empty( $body_replace ) ) $buffer = preg_replace( '/\s*<\/body>/i', PHP_EOL . $body_replace . '</body>', $buffer, 1 );
+
+	$optimizer = new optimizer( $buffer,  NV_BASE_SITEURL );
+	$buffer = $optimizer->process();
+
+    if ( ! empty( $global_config['cdn_url'] ) )
+    {
+        $buffer = preg_replace( "/\<(script|link)(.*?)(src|href)=['\"]((?!http(s?)|ftp\:\/\/).*?\.(js|css))['\"](.*?)\>/", "<\\1\\2\\3=\"" . $global_config['cdn_url'] . "\\4?t=" . $global_config['timestamp'] . "\"\\7>", $buffer );
+    }
+    else
+    {
+        $buffer = preg_replace( "/\<(script|link)(.*?)(src|href)=['\"]((?!http(s?)|ftp\:\/\/).*?\.(js|css))['\"](.*?)\>/", "<\\1\\2\\3=\"\\4?t=" . $global_config['timestamp'] . "\"\\7>", $buffer );
+    }
+
+    return $buffer;
 }
 
 /**
@@ -1794,7 +1688,7 @@ function nv_site_mods( $module_name = '' )
 		{
 			if( defined( 'NV_IS_USER' ) )
 			{
-				$user_ops = array( 'main', 'logout', 'changepass', 'openid', 'editinfo', 'regroups', 'avatar' );
+				$user_ops = array( 'main', 'logout', 'changepass', 'openid', 'editinfo', 'changequestion', 'regroups', 'avatar' );
 			}
 			else
 			{
@@ -1872,7 +1766,7 @@ function nv_insert_notification( $module, $type, $content = array(), $send_to = 
 
 	if( $global_config['notification_active'] )
 	{
-		$content = !empty( $content ) ? serialize( $content ) : '';
+		!empty( $content ) && $content = serialize( $content );
 
 		$sth = $db->prepare( 'INSERT INTO ' . NV_NOTIFICATION_GLOBALTABLE . '
 		(send_to, send_from, area, language, module, type, content, add_time, view)	VALUES

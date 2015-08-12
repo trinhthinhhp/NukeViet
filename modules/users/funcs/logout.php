@@ -37,12 +37,22 @@ else
 	}
 }
 
+$nv_ajax_login = $nv_Request->get_int( 'nv_ajax_login', 'post', 0 );
+if( $nv_ajax_login )
+{
+    $info = $lang_module['logout_ok'] . "<br /><br /><img border=\"0\" src=\"" . NV_BASE_SITEURL . NV_ASSETS_DIR . "/images/load_bar.gif\">";
+    include NV_ROOTDIR . '/includes/header.php';
+    echo $info;
+    include NV_ROOTDIR . '/includes/footer.php';
+    exit;
+}
+
 $page_title = $module_info['custom_title'];
 $key_words = $module_info['keywords'];
 $mod_title = isset( $lang_module['main_title'] ) ? $lang_module['main_title'] : $module_info['custom_title'];
 
 $info = $lang_module['logout_ok'] . "<br /><br />\n";
-$info .= "<img border=\"0\" src=\"" . NV_BASE_SITEURL . "images/load_bar.gif\"><br /><br />\n";
+$info .= "<img border=\"0\" src=\"" . NV_BASE_SITEURL . NV_ASSETS_DIR . "/images/load_bar.gif\"><br /><br />\n";
 $info .= "[<a href=\"" . $url_redirect . "\">" . $lang_module['redirect_to_back'] . "</a>]";
 
 $contents = user_info_exit( $info );

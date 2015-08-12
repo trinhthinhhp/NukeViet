@@ -82,6 +82,9 @@
     "@btn-danger-bg": "@brand-danger",
     "@btn-danger-border": "darken(@btn-danger-bg, 5%)",
     "@btn-link-disabled-color": "@gray-light",
+    "@btn-border-radius-base": "@border-radius-base",
+    "@btn-border-radius-large": "@border-radius-large",
+    "@btn-border-radius-small": "@border-radius-small",
     "@input-bg": "#fff",
     "@input-bg-disabled": "@gray-lighter",
     "@input-color": "@gray",
@@ -213,6 +216,7 @@
     "@jumbotron-bg": "@gray-lighter",
     "@jumbotron-heading-color": "inherit",
     "@jumbotron-font-size": "ceil((@font-size-base * 1.5))",
+    "@jumbotron-heading-font-size": "ceil((@font-size-base * 4.5))",
     "@state-success-text": "#3c763d",
     "@state-success-bg": "#dff0d8",
     "@state-success-border": "darken(spin(@state-success-bg, -10), 5%)",
@@ -249,8 +253,8 @@
     "@label-danger-bg": "@brand-danger",
     "@label-color": "#fff",
     "@label-link-hover-color": "#fff",
-    "@modal-inner-padding": "20px",
-    "@modal-title-padding": "15px",
+    "@modal-inner-padding": "10px",
+    "@modal-title-padding": "10px",
     "@modal-title-line-height": "@line-height-base",
     "@modal-content-bg": "#fff",
     "@modal-content-border-color": "rgba(0,0,0,.2)",
@@ -370,7 +374,7 @@
     "@abbr-border-color": "@gray-light",
     "@headings-small-color": "@gray-light",
     "@blockquote-small-color": "@gray-light",
-    "@blockquote-font-size": "(@font-size-base * 1.25)",
+    "@blockquote-font-size": "@font-size-base",
     "@blockquote-border-color": "@gray-lighter",
     "@page-header-border-color": "@gray-lighter",
     "@dl-horizontal-offset": "@component-offset-horizontal",
@@ -403,7 +407,8 @@
     "component-animations.less",
     "dropdowns.less",
     "tooltip.less",
-    "popovers.less"
+    "popovers.less",
+    "modals.less"
   ],
   "js": [
     "dropdown.js",
@@ -416,5 +421,5 @@
     "scrollspy.js",
     "transition.js"
   ],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=398e59afdccf42c303c9"
+  "customizerUrl": "http://getbootstrap.com/customize/?id=550d0818fda6b9453850"
 }

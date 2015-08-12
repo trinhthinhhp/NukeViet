@@ -6,14 +6,14 @@
 <div class="alert alert-danger">{ERROR}</div>
 <!-- END: error -->
 <!-- BEGIN: edit_user -->
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/jquery/jquery.validate.min.js"></script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/language/jquery.validator-{NV_LANG_INTERFACE}.js"></script>
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.core.css" rel="stylesheet" />
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.theme.css" rel="stylesheet" />
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.datepicker.css" rel="stylesheet" />
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/ui/jquery.ui.core.min.js"></script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/ui/jquery.ui.datepicker.min.js"></script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery/jquery.validate.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.validator-{NV_LANG_INTERFACE}.js"></script>
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.core.css" rel="stylesheet" />
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.theme.css" rel="stylesheet" />
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.datepicker.css" rel="stylesheet" />
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
 <form id="form_user" action="{FORM_ACTION}" method="post" enctype="multipart/form-data" class="form-inline">
 	<div class="table-responsive">
 		<table class="table table-striped table-bordered table-hover">
@@ -175,51 +175,30 @@
 	</div>
 </form>
 <script type="text/javascript">
-	//<![CDATA[
-	document.getElementById('form_user').setAttribute("autocomplete", "off");
-	$(function() {
-		$.toggleShowPassword({
-		    field: '#password2',
-		    control: '#methods'
-		});
-
-		$('#form_user').validate({
-			rules : {
-				username : {
-					minlength : '{NV_UNICKMIN}',
-					maxlength : '{NV_UNICKMAX}',
-				},
-				password : {
-					minlength : '{NV_UPASSMAX}',
-					maxlength : '{NV_UPASSMAX}',
-				},
-				password2 : {
-					equalTo : "#pass_iavim"
-				}
-			}
-		});
-		$("#birthday").datepicker({
-			showOn : "both",
-			dateFormat : "dd/mm/yy",
-			changeMonth : true,
-			changeYear : true,
-			showOtherMonths : true,
-			buttonImage : nv_siteroot + "images/calendar.gif",
-			buttonImageOnly : true,
-			yearRange: "-99:+0"
-		});
-
-		$(".datepicker").datepicker({
-			showOn : "both",
-			dateFormat : "dd/mm/yy",
-			changeMonth : true,
-			changeYear : true,
-			showOtherMonths : true,
-			buttonImage : nv_siteroot + "images/calendar.gif",
-			buttonImageOnly : true,
-		});
+//<![CDATA[
+document.getElementById('form_user').setAttribute("autocomplete", "off");
+$(function() {
+	$.toggleShowPassword({
+	    field: '#password2',
+	    control: '#methods'
 	});
-	//]]>
+	$('#form_user').validate({
+		rules : {
+			username : {
+				minlength : '{NV_UNICKMIN}',
+				maxlength : '{NV_UNICKMAX}',
+			},
+			password : {
+				minlength : '{NV_UPASSMAX}',
+				maxlength : '{NV_UPASSMAX}',
+			},
+			password2 : {
+				equalTo : "#pass_iavim"
+			}
+		}
+	});
+});
+//]]>
 </script>
 <!-- END: edit_user -->
 <!-- END: main -->

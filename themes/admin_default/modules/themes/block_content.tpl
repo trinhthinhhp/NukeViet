@@ -1,29 +1,12 @@
 <!-- BEGIN: head -->
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.core.css" rel="stylesheet" />
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.theme.css" rel="stylesheet" />
-<link type="text/css" href="{NV_BASE_SITEURL}js/ui/jquery.ui.datepicker.css" rel="stylesheet" />
-<style type="text/css">
-	.exp_time {
-		line-height: 20px
-	}
-
-	.exp_time input {
-		float: left
-	}
-
-	.exp_time img {
-		float: left;
-		margin: 2px
-	}
-	.content{
-		padding: 5px;
-	}
-</style>
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.core.css" rel="stylesheet" />
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.theme.css" rel="stylesheet" />
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.datepicker.css" rel="stylesheet" />
 <div class="content">
 <script type="text/javascript">
-	//<![CDATA[
-	var htmlload = '<tr><td class="text-center" colspan="2"><img src="{NV_BASE_SITEURL}images/load_bar.gif"/></td></tr>';
-	//]]>
+//<![CDATA[
+var htmlload = '<tr><td class="text-center" colspan="2"><img src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/images/load_bar.gif"/></td></tr>';
+//]]>
 </script>
 <!-- END: head -->
 <!-- BEGIN: main -->
@@ -37,13 +20,12 @@
 <form method="post" action="{NV_BASE_ADMINURL}index.php?{NV_LANG_VARIABLE}={NV_LANG_DATA}&{NV_NAME_VARIABLE}={MODULE_NAME}&amp;{NV_OP_VARIABLE}={OP}&amp;selectthemes={SELECTTHEMES}&amp;blockredirect={BLOCKREDIRECT}">
 	<div class="table-responsive">
 		<table class="table table-striped table-bordered table-hover">
-			<col style="width:160px;white-space:nowrap" />
-			<col style="width:600px;white-space:nowrap" />
+			<col style="width:180px;white-space:nowrap" />
 			<tbody>
 				<tr>
 					<td>{LANG.block_type}:</td>
 					<td>
-					<select name="module" class="form-control w200 pull-left" style="margin-right: 5px">
+					<select name="module_type" class="form-control w200 pull-left" style="margin-right: 5px">
 						<option value="">{LANG.block_select_type}</option>
 						<option value="theme"{THEME_SELECTED}>{LANG.block_type_theme}</option>
 						<!-- BEGIN: module -->
@@ -96,6 +78,16 @@
 				<tr>
 					<td>{LANG.block_active}:</td>
 					<td><input type="checkbox" name="active" value="1"{ROW.block_active}/> {LANG.block_yes}</td>
+				</tr>
+				<tr>
+					<td>{LANG.hide_device}:</td>
+					<td>
+						<!-- BEGIN: hide_device -->
+							<label id="hide_device_{HIDE_DEVICE.key}" style="padding-right: 20px">
+								<input name="hide_device[]" type="checkbox" value="{HIDE_DEVICE.key}"{HIDE_DEVICE.checked}/>&nbsp;{HIDE_DEVICE.title}
+							</label>
+						<!-- END: hide_device -->
+					</td>
 				</tr>
 				<tr>
 					<td>{GLANG.groups_view}:</td>
@@ -159,9 +151,9 @@
 	var lang_block_no_func = '{LANG.block_no_func}';
 	var lang_block_error_nogroup = '{LANG.block_error_nogroup}';
 </script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/ui/jquery.ui.core.min.js"></script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/ui/jquery.ui.datepicker.min.js"></script>
-<script type="text/javascript" src="{NV_BASE_SITEURL}js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/ui/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
 <script type="text/javascript" src="{NV_BASE_SITEURL}themes/admin_default/js/block_content.js"></script>
 </div>
 <!-- END: main -->
